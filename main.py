@@ -33,8 +33,36 @@ data = data[(data['Quantity']>0) & (data['UnitPrice']>0)]
 data['InvoiceDate'] = pd.to_datetime(data['InvoiceDate'])
 data['CustomerID'] = data['CustomerID'].astype(int)
 
+#EDA
+#Transactionby Country
+# plt.figure(figsize=(10,5))
+# data['Country'].value_counts().head(10).plot(kind='bar')
+# plt.title("Top 10 countries by transactions")
+# plt.show()
 
+#Top Selling Products
+# top_products = data.groupby('Description')['Quantity'].sum().sort_values(ascending=False).head(10)
+# plt.figure(figsize=(10,5))
+# top_products.plot(kind='bar')
+# plt.title("Top 10 selling Products")
+# plt.show()
 
+# data['Month'] = data['InvoiceDate'].dt.to_period('M')
+# print(data[['InvoiceDate', 'Month']].head())
 
+#Purchase Trend Over Time
+# data['Month'] = data['InvoiceDate'].dt.to_period('M')
+# monthly_sales = data.groupby('Month').size()
+# plt.figure(figsize=(12,5))
+# monthly_sales.plot()
+# plt.title("Monthly Purchase Trend")
+# plt.show()
+
+#Monetry Distribution
+data['TotalPrice'] = data['Quantity'] * data['UnitPrice']
+plt.figure(figsize=(8,5))
+sns.histplot(data['TotalPrice'], bins=50)
+plt.title("Transaction value distribution")
+plt.show()
 
 
