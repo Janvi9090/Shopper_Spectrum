@@ -1,0 +1,23 @@
+# ==============================
+# Virtual environments (LOCAL ONLY)
+# ==============================
+venv/
+.venv/
+
+# ==============================
+# Python cache files
+# ==============================
+__pycache__/
+*.pyc
+*.pyo
+
+# ==============================
+# VS Code settings (optional but recommended)
+# ==============================
+.vscode/
+
+# ==============================
+# OS-specific files
+# ==============================
+.DS_Store
+Thumbs.db
