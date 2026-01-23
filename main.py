@@ -59,10 +59,77 @@ data['CustomerID'] = data['CustomerID'].astype(int)
 # plt.show()
 
 #Monetry Distribution
+# data['TotalPrice'] = data['Quantity'] * data['UnitPrice']
+# plt.figure(figsize=(8,5))
+# sns.histplot(data['TotalPrice'], bins=50)
+# plt.title("Transaction value distribution")
+# plt.show()
+
+#RFM Feature Engineering
+latest_date = data['InvoiceDate'].max()
 data['TotalPrice'] = data['Quantity'] * data['UnitPrice']
+
+rfm = data.groupby('CustomerID').agg({
+    'InvoiceDate': lambda x: (latest_date - x.max()).days,
+    'InvoiceNo': 'count',
+    'TotalPrice': 'sum'
+}).reset_index()
+
+rfm.columns = ['CustomerID', 'Recency', 'Frequency', 'Monetary']
+rfm.head()
+
+#RFM Scaling
+scaler = StandardScaler()
+rfm_scaled = scaler.fit_transform(rfm[['Recency', 'Frequency', 'Monetary']])
+
+#Find Optimal Cluster(Elbow+ Silhouette)
+inertia = []
+for k in range(2, 10):
+    km = KMeans(n_clusters= k, random_state=42)
+    km.fit(rfm_scaled)
+    inertia.append(km.inertia_)
 plt.figure(figsize=(8,5))
-sns.histplot(data['TotalPrice'], bins=50)
-plt.title("Transaction value distribution")
+plt.plot(range(2, 10), inertia, marker='o')
+plt.title("Elbow Method")
 plt.show()
+
+#Silhouette Score
+for k in range(2, 6):
+    km = KMeans(n_clusters=k, random_state=42)
+    labels = km.fit_predict(rfm_scaled)
+    print(f"K={k}, Silhouette Score={silhouette_score(rfm_scaled, labels):.3f}")
+
+#Train using Kmeans
+kmeans = KMeans(n_clusters=4, random_state=42)
+rfm['Cluster'] = kmeans.fit_predict(rfm_scaled)
+
+cluster_summary = rfm.groupby('Cluster').mean()
+print(cluster_summary)
+
+#Labels
+cluster_labels= {
+    0: 'Regular',
+    1: 'Occasional',
+    2: 'High_Value',
+    3: 'At-Risk'
+}
+
+rfm['segment'] = rfm['Cluster'].map(cluster_labels)
+
+#Visualize Clusters
+plt.figure(figsize=(8,5))
+sns.scatterplot(x='Recency', y='Monetary', hue= 'segment', data=rfm)
+plt.title("Customer Segmentation")
+plt.show()
+
+#Product Recommendation System
+#Customer-Product Matrix
+product_matrix = data.pivot_table{
+    index= 'CustomerID',
+    columns= 'Description',
+    values='Quantity',
+    aggfunc='sum',
+    fill_value= 0
+    }
 
 
